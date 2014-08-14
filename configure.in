@@ -26,7 +26,6 @@ PKG_CHECK_MODULES([EMC],
  elementary >= 1.11.0
 ])
 
-echo "# ${requirement_cflags_eo} #"
 echo ${EMC_LIBS}
 
 # Checks for header files.
