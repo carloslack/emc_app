@@ -1,6 +1,6 @@
 #include <iostream>
 
-
+#include <Eina.h>
 extern int emc_avplayer(void);
 
 int main(int argc, char **argv)

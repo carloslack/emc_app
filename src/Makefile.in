@@ -3,10 +3,11 @@ PROJ=emc
 SRCS=emc.cc emc_avplayer.cc
 
 emc_LIBADD = @EMC_LIBS@
+emc_CFLAGS = @EMC_CFLAGS@
 
 CC=g++
 all: 
-	$(CC) $(SRCS) ${emc_LIBADD} -o $(PROJ)
+	$(CC) $(SRCS) ${emc_LIBADD} ${emc_CFLAGS} -o $(PROJ)
 
 clean:
 	rm -f emc *.o
