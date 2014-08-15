@@ -1,66 +1,57 @@
-#ifdef HAVE_CONFIG_H
-# include <elementary_config.h>
-#endif
+#include <stdio.h>
 
-#define ELM_INTERNAL_API_ARGESFSDFEFC
-#define ELM_INTERFACE_ATSPI_ACCESSIBLE_PROTECTED
-#define ELM_INTERFACE_ATSPI_COMPONENT_PROTECTED
-#define ELM_INTERFACE_ATSPI_ACTION_PROTECTED
-#define ELM_INTERFACE_ATSPI_VALUE_PROTECTED
-#define ELM_INTERFACE_ATSPI_EDITABLE_TEXT_PROTECTED
-#define ELM_INTERFACE_ATSPI_TEXT_PROTECTED
-#define ELM_INTERFACE_ATSPI_SELECTION_PROTECTED
-#define ELM_INTERFACE_ATSPI_IMAGE_PROTECTED
-#define ELM_INTERFACE_ATSPI_WIDGET_ACTION_PROTECTED
+#include "emc.hh"
 
-#include <iostream>
+extern int emc_avplayer(elm_box &box, const std::string &str);
 
-#include <Eo.h>
-#include <Evas.h>
-#include <Elementary.h>
-#include <elm_widget.h>
+struct emc_app {
+     ::elm_win frame_get(const char *name, const char *title)
+       {
+          elm_policy_set(ELM_POLICY_QUIT, ELM_POLICY_QUIT_LAST_WINDOW_CLOSED);
 
-#include "elm_interface_atspi_accessible.h"
-#include "elm_interface_atspi_accessible.eo.h"
+          ::elm_win win (elm_win_util_standard_add(name, title));
+          win.autodel_set(true);
 
-#include "elm_interface_atspi_widget_action.h"
-#include "elm_interface_atspi_widget_action.eo.h"
-#include <elm_win.eo.hh>
-#include <elm_box.eo.hh>
-#include <elm_button.eo.hh>
-
-#include <Eina.hh>
-
-#include <deque>
-
-extern int emc_avplayer(void);
-
-#if 1
-struct clean_ref
-{
-  clean_ref(efl::eo::base base)
-    : _ref(base._eo_ptr())
-  {}
-
-  template <typename T>
-  void operator()(T const&, Eo_Event_Description const&, void*) const
-  {
-    if(_ref)
-      eo_unref(_ref);
-  }
-
-  Eo* _ref;
+          return win;
+       }
 };
-#endif
+
 EAPI_MAIN int
 elm_main(int argc, char **argv)
 {
-   ecore_init();
+   Eo* test;
 
-   std::cout << __FUNCTION__ << std::endl;
-   emc_avplayer();
+   if(argc < 2)
+     {
+        std::cout << "Use: ./" << argv[0]
+            << " <filename>" << std::endl;
+        return 1;
+     }
+     {
+        emc_app app;
+        ::elm_win win = app.frame_get("emc-window","Main EMC Frame");
 
-   ecore_shutdown();
+        elm_box bigbox ( efl::eo::parent = win );
+        bigbox.size_hint_weight_set(EVAS_HINT_EXPAND, EVAS_HINT_EXPAND);
+        win.resize_object_add(bigbox);
+        bigbox.visibility_set(true);
+        win.callback_del_add(clean_ref(bigbox));
+
+        win.size_set(300, 320);
+        win.visibility_set(true);
+
+        emc_avplayer(bigbox, argv[1]);
+
+        std::cout << "references to win " << win.ref_get() << std::endl;
+        test = win._eo_ptr();
+        win._release();
+     }
+
+   std::cout << "references to win " << eo_ref_get(test) << std::endl;
+
+   elm_run();
+   elm_shutdown();
+
    return 0;
 }
 ELM_MAIN()
