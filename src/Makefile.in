@@ -4,10 +4,12 @@ SRCS=emc.cc emc_avplayer.cc
 
 emc_LIBADD = @EMC_LIBS@
 emc_CFLAGS = @EMC_CFLAGS@
+DEFS = -DEFL_BETA_API_SUPPORT
+CC = @CXX@
 
-CC=g++
-all: 
-	$(CC) $(SRCS) ${emc_LIBADD} ${emc_CFLAGS} -o $(PROJ)
+
+all:
+	$(CC) $(SRCS) -std=c++11 ${emc_LIBADD}  ${emc_CFLAGS} ${DEFS} -o $(PROJ)
 
 clean:
 	rm -f emc *.o

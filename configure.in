@@ -18,12 +18,15 @@ AC_PROG_MAKE_SET
 # Check for EFL
 PKG_CHECK_MODULES([EMC],
 [
- eo >= 1.11.0
- eina >= 1.11.0
- evas >= 1.11.0
- ecore >= 1.11.0
- edje >= 1.11.0
  elementary >= 1.11.0
+ eo >= 1.11.0
+ eo-cxx >= 1.11.0
+ eina-cxx >= 1.11.0
+ edje-cxx >= 1.11.0
+ evas-cxx >= 1.11.0
+ ecore-cxx >= 1.11.0
+ edje-cxx >= 1.11.0
+ eolian-cxx >= 1.11.0
 ])
 
 # Checks for header files.
