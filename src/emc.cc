@@ -4,22 +4,12 @@
 
 extern int emc_avplayer(elm_box &box, const std::string &str);
 
-struct emc_app {
-     ::elm_win frame_get(const char *name, const char *title)
-       {
-          elm_policy_set(ELM_POLICY_QUIT, ELM_POLICY_QUIT_LAST_WINDOW_CLOSED);
-
-          ::elm_win win (elm_win_util_standard_add(name, title));
-          win.autodel_set(true);
-
-          return win;
-       }
-};
 
 EAPI_MAIN int
 elm_main(int argc, char **argv)
 {
    Eo* test;
+   std::string filename;
 
    if(argc < 2)
      {
@@ -27,9 +17,27 @@ elm_main(int argc, char **argv)
             << " <filename>" << std::endl;
         return 1;
      }
+
+   filename = argv[1];
+
+   emc_app_av player("t","y");
+   ::elm_win win = player.emc_app_win_get();
+
+   player.file_set(filename);
+   player.position_set(0.0);
+   player.volume_set(0.50);
+
+
+#if 0
+   if(argc < 2)
      {
-        emc_app app;
-        ::elm_win win = app.frame_get("emc-window","Main EMC Frame");
+        std::cout << "Use: ./" << argv[0]
+            << " <filename>" << std::endl;
+        return 1;
+     }
+     {
+        emc_app app("emc-window","Main EMC Frame");
+        ::elm_win win = player.emc_app_win_get();
 
         elm_box bigbox ( efl::eo::parent = win );
         bigbox.size_hint_weight_set(EVAS_HINT_EXPAND, EVAS_HINT_EXPAND);
@@ -51,7 +59,7 @@ elm_main(int argc, char **argv)
 
    elm_run();
    elm_shutdown();
-
+#endif
    return 0;
 }
 ELM_MAIN()

@@ -37,6 +37,8 @@
 
 #include <deque>
 
+#define __GO(x, y, z) ::elm_win x(elm_win_util_standard_add(#y, #z))
+
 struct clean_ref
 {
   clean_ref(efl::eo::base base)
@@ -49,8 +51,39 @@ struct clean_ref
     if(_ref)
       eo_unref(_ref);
   }
-
   Eo* _ref;
+};
+
+class emc_app {
+    private:
+        const char *name;
+        const char *title;
+    public:
+        emc_app(const char *n, const char *t) : name(n), title(t) {}
+
+        ::elm_win emc_app_win_get(void)
+          {
+             elm_policy_set(ELM_POLICY_QUIT, ELM_POLICY_QUIT_LAST_WINDOW_CLOSED);
+
+             Evas_Object *evas = elm_win_util_standard_add(name, title);
+             ::elm_win win(evas);
+             win.autodel_set(true);
+             return win;
+          }
+};
+
+class emc_app_av : public virtual emc_app
+{
+    private:
+        std::string av_filename;
+        double av_position;
+        double av_volume;
+  public:
+      emc_app_av(const char *n, const char *t) : emc_app(n,t) {}
+
+      void file_set(std::string &filename);
+      void position_set(const double &position);
+      void volume_set(const double &volume);
 };
 
 
