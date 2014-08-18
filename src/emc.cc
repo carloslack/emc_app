@@ -2,9 +2,6 @@
 
 #include "emc.hh"
 
-extern int emc_avplayer(elm_box &box, const std::string &str);
-
-
 EAPI_MAIN int
 elm_main(int argc, char **argv)
 {
@@ -25,7 +22,7 @@ elm_main(int argc, char **argv)
    player.file_set(filename);
    player.position_set(0.0);
    player.volume_set(0.50);
-   player.play_set(EINA_TRUE); /**< player releases thw window */
+   player.play_set(EINA_TRUE); /**< player releases the window */
 
    elm_run();
    elm_shutdown();

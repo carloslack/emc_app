@@ -37,8 +37,6 @@
 
 #include <deque>
 
-#define __GO(x, y, z) ::elm_win x(elm_win_util_standard_add(#y, #z))
-
 struct clean_ref
 {
   clean_ref(efl::eo::base base)
@@ -80,7 +78,9 @@ class emc_app_av : public virtual emc_app
       double av_volume;
       Eina_Bool av_play;
   public:
-      emc_app_av(const char *n, const char *t) : emc_app(n,t), av_play(EINA_FALSE) {}
+      emc_app_av(const char *n, const char *t) :
+          emc_app(n,t), av_filename(""), av_position(0.0),
+          av_volume(0.0), av_play(EINA_FALSE) {}
       ~emc_app_av() {}
 
       Eina_Bool file_set(const std::string &filename);
@@ -88,12 +88,10 @@ class emc_app_av : public virtual emc_app
       Eina_Bool volume_set(const double &volume);
       Eina_Bool play_set(const Eina_Bool &value);
 
-  private:
       const std::string file_get(void) { return this->av_filename; }
       double position_get(void) { return this->av_position; }
       double volume_get(void) { return this->av_volume; }
       Eina_Bool play_get(void) { return this->av_play; }
-
 };
 
 

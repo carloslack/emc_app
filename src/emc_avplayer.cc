@@ -28,9 +28,8 @@ Eina_Bool
 emc_app_av::play_set(const Eina_Bool &play)
 {
    Eo* test;
-   Eina_Bool _play = this->av_play;
 
-   if(_play == EINA_FALSE)
+   if(this->av_play == EINA_FALSE)
      {
         this->av_play = play;
 
