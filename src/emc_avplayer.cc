@@ -1,27 +1,56 @@
 
 #include <iostream>
+#include <stdio.h>
 #include "emc.hh"
 
-void
-emc_app_av::file_set(std::string &filename)
+Eina_Bool
+emc_app_av::file_set(const std::string &filename)
 {
-   av_filename = filename;
+   this->av_filename = filename;
+   return EINA_TRUE;
 }
 
-void
+Eina_Bool
 emc_app_av::position_set(const double &position)
 {
-   av_position = position;
+   this->av_position = position;
+   return EINA_TRUE;
 }
 
-void
+Eina_Bool
 emc_app_av::volume_set(const double &volume)
 {
-   av_volume = volume;
+   this->av_volume = volume;
+   return EINA_TRUE;
 }
 
-int emc_avplayer(elm_box &box, const std::string &str)
+Eina_Bool
+emc_app_av::play_set(const Eina_Bool &play)
 {
-   std::cout << "reading from file: " << str << std::endl;
-   return 0;
+   Eo* test;
+   Eina_Bool _play = this->av_play;
+
+   if(_play == EINA_FALSE)
+     {
+        this->av_play = play;
+
+        ::elm_win win = this->emc_app_win_get();
+
+        elm_box bigbox ( efl::eo::parent = win );
+        bigbox.size_hint_weight_set(EVAS_HINT_EXPAND, EVAS_HINT_EXPAND);
+        win.resize_object_add(bigbox);
+        bigbox.visibility_set(true);
+        win.callback_del_add(clean_ref(bigbox));
+
+        win.size_set(300, 320);
+        win.visibility_set(true);
+        std::cout << "references to win " << win.ref_get() << std::endl;
+        test = win._eo_ptr();
+        win._release();
+
+        return EINA_TRUE;
+     }
+
+   return EINA_FALSE;
 }
+

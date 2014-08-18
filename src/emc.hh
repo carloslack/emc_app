@@ -74,16 +74,26 @@ class emc_app {
 
 class emc_app_av : public virtual emc_app
 {
-    private:
-        std::string av_filename;
-        double av_position;
-        double av_volume;
+  private:
+      std::string av_filename;
+      double av_position;
+      double av_volume;
+      Eina_Bool av_play;
   public:
-      emc_app_av(const char *n, const char *t) : emc_app(n,t) {}
+      emc_app_av(const char *n, const char *t) : emc_app(n,t), av_play(EINA_FALSE) {}
+      ~emc_app_av() {}
 
-      void file_set(std::string &filename);
-      void position_set(const double &position);
-      void volume_set(const double &volume);
+      Eina_Bool file_set(const std::string &filename);
+      Eina_Bool position_set(const double &position);
+      Eina_Bool volume_set(const double &volume);
+      Eina_Bool play_set(const Eina_Bool &value);
+
+  private:
+      const std::string file_get(void) { return this->av_filename; }
+      double position_get(void) { return this->av_position; }
+      double volume_get(void) { return this->av_volume; }
+      Eina_Bool play_get(void) { return this->av_play; }
+
 };
 
 
