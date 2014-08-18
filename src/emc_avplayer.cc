@@ -41,6 +41,11 @@ emc_app_av::play_set(Eina_Bool play)
         bigbox.visibility_set(true);
         win.callback_del_add(clean_ref(bigbox));
 
+        elm_hover hover = { efl::eo::parent = win };
+        bigbox.pack_end(hover);
+        hover.visibility_set(true);
+        win.callback_del_add(clean_ref(hover));
+
         win.size_set(300, 320);
         win.visibility_set(true);
         std::cout << "references to win " << win.ref_get() << std::endl;

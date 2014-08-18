@@ -20,6 +20,8 @@
 #include <elm_win.eo.hh>
 #include <elm_box.eo.hh>
 #include <elm_button.eo.hh>
+#include <elm_hover.eo.hh>
+#include <elm_button.eo.hh>
 
 #include <Eina.hh>
 
