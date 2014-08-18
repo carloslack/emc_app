@@ -84,9 +84,9 @@ class emc_app_av : public virtual emc_app
       ~emc_app_av() {}
 
       Eina_Bool file_set(const std::string &filename);
-      Eina_Bool position_set(const double &position);
-      Eina_Bool volume_set(const double &volume);
-      Eina_Bool play_set(const Eina_Bool &value);
+      Eina_Bool position_set(double position);
+      Eina_Bool volume_set(double volume);
+      Eina_Bool play_set(Eina_Bool value);
 
       const std::string file_get(void) { return this->av_filename; }
       double position_get(void) { return this->av_position; }

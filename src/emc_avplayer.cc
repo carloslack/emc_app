@@ -11,21 +11,21 @@ emc_app_av::file_set(const std::string &filename)
 }
 
 Eina_Bool
-emc_app_av::position_set(const double &position)
+emc_app_av::position_set(double position)
 {
    this->av_position = position;
    return EINA_TRUE;
 }
 
 Eina_Bool
-emc_app_av::volume_set(const double &volume)
+emc_app_av::volume_set(double volume)
 {
    this->av_volume = volume;
    return EINA_TRUE;
 }
 
 Eina_Bool
-emc_app_av::play_set(const Eina_Bool &play)
+emc_app_av::play_set(Eina_Bool play)
 {
    Eo* test;
 
