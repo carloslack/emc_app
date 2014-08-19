@@ -52,15 +52,18 @@ emc_app_av::play_set(Eina_Bool play)
         bigbox.visibility_set(true);
         win.callback_del_add(clean_ref(bigbox));
 
-        //XXX: need to fit window screen
         //XXX: Implement lambda+signals
         elm_video video ( efl::eo::parent = win);
         video.file_set(file_get());
         video.play_position_set(position_get());
         video.audio_level_set(volume_get());
-        video.size_set(300, 320);
+
+        // Fits the window size
+        video.size_hint_weight_set(EVAS_HINT_EXPAND, EVAS_HINT_EXPAND);
+        win.resize_object_add(video);
+
         video.visibility_set(true);
-        win.callback_del_add(clean_ref(video)); //XXX: issues warning 'already deleted'
+        win.callback_del_add(clean_ref(video));
         debug_show(this);
         video.play();
 
