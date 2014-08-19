@@ -5,6 +5,10 @@
 
 #include "emc.hh"
 
+struct AV_Data
+{
+};
+
 static void
 debug_show(emc_app_av *av)
 {
@@ -39,6 +43,8 @@ Eina_Bool
 emc_app_av::play_set(Eina_Bool play)
 {
    Eo* test;
+   struct AV_Data avdata;
+   memset(&avdata, 0, sizeof(struct AV_Data));
 
    if(this->av_play == EINA_FALSE)
      {
@@ -46,14 +52,16 @@ emc_app_av::play_set(Eina_Bool play)
 
         ::elm_win win = this->emc_app_win_get();
 
-        elm_box bigbox ( efl::eo::parent = win );
+        elm_box bigbox( efl::eo::parent = win );
         bigbox.size_hint_weight_set(EVAS_HINT_EXPAND, EVAS_HINT_EXPAND);
         win.resize_object_add(bigbox);
         bigbox.visibility_set(true);
+        bigbox.horizontal_set(true);
+        bigbox.show();
         win.callback_del_add(clean_ref(bigbox));
 
         //XXX: Implement lambda+signals
-        elm_video video ( efl::eo::parent = win);
+        elm_video video ( efl::eo::parent = win );
         video.file_set(file_get());
         video.play_position_set(position_get());
         video.audio_level_set(volume_get());
@@ -64,6 +72,40 @@ emc_app_av::play_set(Eina_Bool play)
 
         video.visibility_set(true);
         win.callback_del_add(clean_ref(video));
+
+        // Buttons
+        elm_box buttons ( efl::eo::parent = win );
+        buttons.horizontal_set(EINA_TRUE);
+        bigbox.pack_end(buttons);
+        buttons.visibility_set(true);
+        win.callback_del_add(clean_ref(buttons));
+
+        elm_button play ( efl::eo::parent = win );
+        play.text_set("elm.text", "Play");
+        buttons.pack_end(play);
+        play.visibility_set(true);
+
+        // lambda 'Play' button
+        play.callback_clicked_add
+            (std::bind([&avdata]
+                       { //XXX: implement
+
+                       }));
+        win.callback_del_add(clean_ref(play));
+
+        elm_button pause ( efl::eo::parent = win );
+        pause.text_set("elm.text", "Pause");
+        buttons.pack_end(pause);
+        pause.visibility_set(true);
+
+        // lambda 'Pause' button
+        pause.callback_clicked_add
+            (std::bind([&avdata]
+                       { //XXX: implement
+
+                       }));
+        win.callback_del_add(clean_ref(pause));
+
         debug_show(this);
         video.play();
 
