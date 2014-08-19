@@ -1,3 +1,9 @@
 Compile:
 
 aclocal && autoscan && autoconf && ./configure && make
+
+gstreamer plugin:
+
+For Ubuntu:
+
+$ sudo aptitude install ubuntu-restricted-extras
