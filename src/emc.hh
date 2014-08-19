@@ -20,8 +20,10 @@
 #include <elm_win.eo.hh>
 #include <elm_box.eo.hh>
 #include <elm_button.eo.hh>
+#include <elm_video.eo.hh>
 #include <elm_hover.eo.hh>
 #include <elm_button.eo.hh>
+#include <elm_actionslider.eo.hh>
 
 #include <Eina.hh>
 
@@ -46,15 +48,17 @@ class emc_app {
     private:
         const char *name;
         const char *title;
+        Evas_Object *evas_win_obj;
     public:
         emc_app(const char *n, const char *t) : name(n), title(t) {}
 
+        Evas_Object *evas_win_get(void) { return this->evas_win_obj;}
         ::elm_win emc_app_win_get(void)
           {
              elm_policy_set(ELM_POLICY_QUIT, ELM_POLICY_QUIT_LAST_WINDOW_CLOSED);
 
-             Evas_Object *evas = elm_win_util_standard_add(name, title);
-             ::elm_win win(evas);
+             this->evas_win_obj = elm_win_util_standard_add(name, title);
+             ::elm_win win(this->evas_win_obj);
              win.autodel_set(true);
              return win;
           }
@@ -67,6 +71,7 @@ class emc_app_av : public virtual emc_app
       double av_position;
       double av_volume;
       Eina_Bool av_play;
+      //void debug_show(void); //for debug only, won't be included
   public:
       emc_app_av(const char *n, const char *t) :
           emc_app(n,t), av_filename(""), av_position(0.0),

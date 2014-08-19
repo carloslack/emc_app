@@ -1,7 +1,18 @@
 
 #include <iostream>
 #include <stdio.h>
+
+
 #include "emc.hh"
+
+static void
+debug_show(emc_app_av *av)
+{
+   std::cout << "File: " << av->file_get() << std::endl;
+   std::cout << "Position: " << av->position_get() << std::endl;
+   std::cout << "Volume: " << av->volume_get() << std::endl;
+   std::cout << "Play: " << ((av->play_get() == EINA_TRUE) ? "true" : "false") << std::endl;
+}
 
 Eina_Bool
 emc_app_av::file_set(const std::string &filename)
@@ -41,10 +52,17 @@ emc_app_av::play_set(Eina_Bool play)
         bigbox.visibility_set(true);
         win.callback_del_add(clean_ref(bigbox));
 
-        elm_hover hover = { efl::eo::parent = win };
-        bigbox.pack_end(hover);
-        hover.visibility_set(true);
-        win.callback_del_add(clean_ref(hover));
+        //XXX: need to fit window screen
+        //XXX: Implement lambda+signals
+        elm_video video ( efl::eo::parent = win);
+        video.file_set(file_get());
+        video.play_position_set(position_get());
+        video.audio_level_set(volume_get());
+        video.size_set(300, 320);
+        video.visibility_set(true);
+        win.callback_del_add(clean_ref(video)); //XXX: issues warning 'already deleted'
+        debug_show(this);
+        video.play();
 
         win.size_set(300, 320);
         win.visibility_set(true);
