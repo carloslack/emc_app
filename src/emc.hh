@@ -71,7 +71,6 @@ class emc_app_av : public virtual emc_app
       double av_position;
       double av_volume;
       Eina_Bool av_play;
-      //void debug_show(void); //for debug only, won't be included
   public:
       emc_app_av(const char *n, const char *t) :
           emc_app(n,t), av_filename(""), av_position(0.0),
