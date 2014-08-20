@@ -22,6 +22,7 @@ elm_main(int argc, char **argv)
    player.file_set(filename);
    player.position_set(0.0);
    player.volume_set(0.9);
+   player.loop_set(true);
    player.play_set(true); /**< player releases the window */
 
    elm_run();

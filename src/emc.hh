@@ -57,6 +57,7 @@ class emc_app {
         }
         ~emc_app() {}
 
+        Evas_Object *get_evas(void) { return this->evas_win_obj;}
         ::elm_win emc_app_win_get(void)
           {
              ::elm_win win(evas_win_obj);
@@ -71,19 +72,20 @@ class emc_app_av : public emc_app
       std::string av_filename;
       double av_position;
       double av_volume;
-      bool av_play;
+      bool av_loop;
       ::elm_win win;
       const std::string file_get(void) { return this->av_filename; }
   public:
       emc_app_av(const char *n, const char *t) :
           emc_app(n,t), av_filename(""), av_position(0.0),
-          av_volume(0.0), av_play(EINA_FALSE), win(emc_app_win_get()) { }
+          av_volume(0.0), av_loop(false), win(emc_app_win_get()) { }
       ~emc_app_av() {}
 
       Eina_Bool file_set(const std::string &filename);
       Eina_Bool position_set(double position);
       Eina_Bool volume_set(double volume);
       Eina_Bool play_set(Eina_Bool value);
+      Eina_Bool loop_set(bool loop);
 };
 
 

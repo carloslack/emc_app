@@ -6,6 +6,7 @@
 struct AV_Data
 {
    efl::eo::wref<elm_video> video;
+   bool loop;
 };
 
 Eina_Bool
@@ -33,23 +34,52 @@ emc_app_av::volume_set(double volume)
 }
 
 Eina_Bool
+emc_app_av::loop_set(bool loop)
+{
+   this->av_loop = loop;
+   return EINA_TRUE;
+}
+
+static void
+video_obj_stopped_cb(void *data EINA_UNUSED, Evas_Object *obj, void *event_info EINA_UNUSED)
+{
+   struct AV_Data *av = static_cast<struct AV_Data*>(data);
+   std::cout  << "video stopped!" << std::endl;
+
+   if(av->loop == true)
+     {
+        if(efl::eina::optional<elm_video> video = av->video.lock())
+          {
+             video->play_position_set(0.0);
+             video->play();
+          }
+     }
+}
+static void
+video_obj_progress_cb(void *data EINA_UNUSED, Evas_Object *obj, void *event_info EINA_UNUSED)
+{
+   struct AV_Data *av = (struct AV_Data*)data;
+
+   if(efl::eina::optional<elm_video> video = av->video.lock())
+     {
+     }
+}
+
+
+Eina_Bool
 emc_app_av::play_set(Eina_Bool play)
 {
-#if 1
    Eo* test;
-   struct AV_Data avdata;
-   memset(&avdata, 0, sizeof(struct AV_Data));
+   struct AV_Data tdata;
+   memset(&tdata, 0, sizeof(struct AV_Data));
 
-   if(this->av_play == EINA_FALSE)
+   if(play == EINA_TRUE)
      {
-        this->av_play = play;
-
         elm_box bigbox( efl::eo::parent = win );
         bigbox.size_hint_weight_set(EVAS_HINT_EXPAND, EVAS_HINT_EXPAND);
         win.resize_object_add(bigbox);
         bigbox.visibility_set(true);
         bigbox.horizontal_set(true);
-        bigbox.show();
         win.callback_del_add(clean_ref(bigbox));
 
         //XXX: Implement lambda+signals
@@ -81,10 +111,10 @@ emc_app_av::play_set(Eina_Bool play)
 
         // Embedded lambda function for Play button
         play.callback_clicked_add
-            (std::bind([&avdata] (void)
+            (std::bind([&tdata] (void)
                 {
                     std::cout << "Video Play" << std::endl;
-                    if(efl::eina::optional<elm_video> video = avdata.video.lock())
+                    if(efl::eina::optional<elm_video> video = tdata.video.lock())
                         {
                             if(!video->is_playing_get())
                                 video->play();
@@ -100,10 +130,10 @@ emc_app_av::play_set(Eina_Bool play)
 
         // Embedded lambda function for Pause button
         pause.callback_clicked_add
-            (std::bind([&avdata] (void)
+            (std::bind([&tdata] (void)
                 {
                     std::cout << "Video Pause" << std::endl;
-                    if(efl::eina::optional<elm_video> video = avdata.video.lock())
+                    if(efl::eina::optional<elm_video> video = tdata.video.lock())
                     {
                         if(video->is_playing_get())
                             video->pause();
@@ -111,13 +141,35 @@ emc_app_av::play_set(Eina_Bool play)
                 }));
         win.callback_del_add(clean_ref(pause));
 
+        tdata.video = video;
+        tdata.loop = this->av_loop;
+
+#if 0 // Nothing happens :(
+    video.callback_decode_stop_add
+            (std::bind([&tdata] (void)
+                {
+                    std::cout << "Decode stop" << std::endl;
+                }));
+    video.callback_progress_change_add
+            (std::bind([&tdata] (void)
+                {
+                    std::cout << "Progress change" << std::endl;
+                }));
+
+#else
+        static struct AV_Data _stdata; //only for test
+        _stdata.video = video;
+        _stdata.loop = this->av_loop;
+        Evas_Object *_tmp_obj;
+        eo_do(video._eo_ptr(), _tmp_obj = ::elm_obj_video_emotion_get());
+        evas_object_smart_callback_add(_tmp_obj, "decode_stop", video_obj_stopped_cb, &_stdata);
+        evas_object_smart_callback_add(_tmp_obj, "progress_change", video_obj_progress_cb, &_stdata);
+#endif
         video.play();
 
         std::cout << "File: " << file_get() << std::endl;
         std::cout << "Position: " << video.play_position_get() << std::endl;
         std::cout << "Volume: " << video.audio_level_get() << std::endl;
-
-        avdata.video = video;
 
         win.size_set(300, 320);
         win.visibility_set(true);
@@ -127,7 +179,6 @@ emc_app_av::play_set(Eina_Bool play)
 
         return EINA_TRUE;
      }
-#endif
    return EINA_FALSE;
 }
 
