@@ -22,7 +22,7 @@ elm_main(int argc, char **argv)
    player.file_set(filename);
    player.position_set(0.0);
    player.volume_set(0.9);
-   player.play_set(EINA_TRUE); /**< player releases the window */
+   player.play_set(true); /**< player releases the window */
 
    elm_run();
    elm_shutdown();

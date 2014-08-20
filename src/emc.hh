@@ -50,42 +50,40 @@ class emc_app {
         const char *title;
         Evas_Object *evas_win_obj;
     public:
-        emc_app(const char *n, const char *t) : name(n), title(t) {}
+        emc_app(const char *n, const char *t) : name(n), title(t),
+         evas_win_obj(elm_win_util_standard_add(name, title))
+        {
+             elm_policy_set(ELM_POLICY_QUIT, ELM_POLICY_QUIT_LAST_WINDOW_CLOSED);
+        }
+        ~emc_app() {}
 
-        Evas_Object *evas_win_get(void) { return this->evas_win_obj;}
         ::elm_win emc_app_win_get(void)
           {
-             elm_policy_set(ELM_POLICY_QUIT, ELM_POLICY_QUIT_LAST_WINDOW_CLOSED);
-
-             this->evas_win_obj = elm_win_util_standard_add(name, title);
-             ::elm_win win(this->evas_win_obj);
+             ::elm_win win(evas_win_obj);
              win.autodel_set(true);
              return win;
           }
 };
 
-class emc_app_av : public virtual emc_app
+class emc_app_av : public emc_app
 {
   private:
       std::string av_filename;
       double av_position;
       double av_volume;
-      Eina_Bool av_play;
+      bool av_play;
+      ::elm_win win;
+      const std::string file_get(void) { return this->av_filename; }
   public:
       emc_app_av(const char *n, const char *t) :
           emc_app(n,t), av_filename(""), av_position(0.0),
-          av_volume(0.0), av_play(EINA_FALSE) {}
+          av_volume(0.0), av_play(EINA_FALSE), win(emc_app_win_get()) { }
       ~emc_app_av() {}
 
       Eina_Bool file_set(const std::string &filename);
       Eina_Bool position_set(double position);
       Eina_Bool volume_set(double volume);
       Eina_Bool play_set(Eina_Bool value);
-
-      const std::string file_get(void) { return this->av_filename; }
-      double position_get(void) { return this->av_position; }
-      double volume_get(void) { return this->av_volume; }
-      Eina_Bool play_get(void) { return this->av_play; }
 };
 
 
