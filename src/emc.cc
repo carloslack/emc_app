@@ -16,8 +16,9 @@ elm_main(int argc, char **argv)
      }
 
      {
+        Evas_Object *win_obj = elm_win_util_standard_add("emc-window","Main EMC Frame");
         elm_policy_set(ELM_POLICY_QUIT, ELM_POLICY_QUIT_LAST_WINDOW_CLOSED);
-        ::elm_win win(elm_win_util_standard_add("emc-window","Main EMC Frame"));
+        ::elm_win win(win_obj);
         win.autodel_set(true);
         emc_app_av player(win);
 
