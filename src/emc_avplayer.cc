@@ -173,10 +173,6 @@ emc_app_av::play_set(Eina_Bool play)
 
         win.size_set(300, 320);
         win.visibility_set(true);
-        std::cout << "references to win " << win.ref_get() << std::endl;
-        test = win._eo_ptr();
-        win._release();
-
         return EINA_TRUE;
      }
    return EINA_FALSE;
