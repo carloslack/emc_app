@@ -169,11 +169,7 @@ emc_avplayer::play_set(Eina_Bool to_play)
 
 #else // temporary impl
         Evas_Object *_tmp_video_obj;
-//        Evas_Object *_tmp_slider_obj;
         eo_do(video. _eo_ptr(), _tmp_video_obj = ::elm_obj_video_emotion_get());
-
-  //      eo_do(slider. _eo_ptr(), _tmp_slider_obj = ::elm_slider_value_set);
-
         evas_object_smart_callback_add(_tmp_video_obj, "decode_stop", video_obj_stopped_cb, this);
         evas_object_smart_callback_add(_tmp_video_obj, "progress_change", video_obj_progress_cb, this);
 #endif
