@@ -24,7 +24,7 @@ elm_main(int argc, char **argv)
         filename = argv[1];
         player.file_set(filename);
         player.position_set(0.0);
-        player.volume_set(0.9);
+        player.volume_set(1.0);
         player.loop_set(true);
         player.play_set(true);
         std::cout << "references to win " << win.ref_get() << std::endl;

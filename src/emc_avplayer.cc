@@ -18,6 +18,7 @@ emc_avplayer::emc_avplayer(::elm_win &_win) :
           EMC_ELM_PARENT_INIT(bigbox, win),
           EMC_ELM_PARENT_INIT(buttons, win),
           EMC_ELM_PARENT_INIT(notify, win),
+          EMC_ELM_PARENT_INIT(slider, win),
           EMC_ELM_PARENT_INIT(play, win),
           EMC_ELM_PARENT_INIT(pause, win)
    {
@@ -32,6 +33,17 @@ emc_avplayer::emc_avplayer(::elm_win &_win) :
       bigbox.visibility_set(true);
       bigbox.horizontal_set(true);
       win.callback_del_add(clean_ref(bigbox));
+
+      // VOlume slider
+      slider.min_max_set(0,10);
+      slider.horizontal_set(false);
+      slider.unit_format_set("%1.1f");
+      slider.indicator_format_set("%1.1f");
+      slider.visibility_set(true);
+      slider.inverted_set(true);
+      slider.size_hint_weight_set(EVAS_HINT_EXPAND, EVAS_HINT_EXPAND);
+      bigbox.pack_end(slider);
+      win.callback_del_add(clean_ref(slider));
 
       // Buttons
       buttons.horizontal_set(EINA_TRUE);
@@ -96,6 +108,8 @@ Eina_Bool
 emc_avplayer::volume_set(double volume)
 {
    video.audio_level_set(volume);
+   //Set slider position to match volume level
+   slider.value_set(video.audio_level_get());
    return EINA_TRUE;
 }
 
@@ -134,6 +148,13 @@ emc_avplayer::play_set(Eina_Bool to_play)
                         }
                 }));
 
+    slider.callback_changed_add
+            (std::bind([this] ()
+                {
+                    std::cout << "New volume: " << slider.value_get() << std::endl;
+                    video.audio_level_set(static_cast<double>(slider.value_get()));
+                }));
+
 #ifndef EMC_DISABLE_EO_CALLBACK // waiting for E support. See elm_video.eo events
     video.callback_decode_stop_add
             (std::bind([this] ()
@@ -147,10 +168,14 @@ emc_avplayer::play_set(Eina_Bool to_play)
                 }));
 
 #else // temporary impl
-        Evas_Object *_tmp_obj;
-        eo_do(video._eo_ptr(), _tmp_obj = ::elm_obj_video_emotion_get());
-        evas_object_smart_callback_add(_tmp_obj, "decode_stop", video_obj_stopped_cb, this);
-        evas_object_smart_callback_add(_tmp_obj, "progress_change", video_obj_progress_cb, this);
+        Evas_Object *_tmp_video_obj;
+//        Evas_Object *_tmp_slider_obj;
+        eo_do(video. _eo_ptr(), _tmp_video_obj = ::elm_obj_video_emotion_get());
+
+  //      eo_do(slider. _eo_ptr(), _tmp_slider_obj = ::elm_slider_value_set);
+
+        evas_object_smart_callback_add(_tmp_video_obj, "decode_stop", video_obj_stopped_cb, this);
+        evas_object_smart_callback_add(_tmp_video_obj, "progress_change", video_obj_progress_cb, this);
 #endif
         video.play();
 
