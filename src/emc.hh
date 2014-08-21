@@ -49,15 +49,21 @@ class emc_app_av
 {
   private:
       std::string av_filename;
-      double av_position;
-      double av_volume;
       bool av_loop;
       ::elm_win win;
+      ::elm_video video;
       const std::string file_get(void) { return this->av_filename; }
+      Eina_Bool widget_setup(void);
   public:
       emc_app_av(::elm_win &_win) :
-          av_filename(""), av_position(0.0),
-          av_volume(0.0), av_loop(false), win(_win) { }
+          av_filename(""), av_loop(false),
+          win(_win), video(efl::eo::parent = _win)
+   {
+      video.size_hint_weight_set(EVAS_HINT_EXPAND, EVAS_HINT_EXPAND);
+      win.resize_object_add(video);
+      video.visibility_set(true);
+      win.callback_del_add(clean_ref(video));
+   }
       ~emc_app_av() {}
 
       Eina_Bool file_set(const std::string &filename);

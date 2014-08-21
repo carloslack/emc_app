@@ -16,20 +16,22 @@ emc_app_av::file_set(const std::string &filename)
      return EINA_FALSE;
 
    this->av_filename = filename;
+   video.file_set(this->av_filename);
+
    return EINA_TRUE;
 }
 
 Eina_Bool
 emc_app_av::position_set(double position)
 {
-   this->av_position = position;
+   video.play_position_set(position);
    return EINA_TRUE;
 }
 
 Eina_Bool
 emc_app_av::volume_set(double volume)
 {
-   this->av_volume = volume;
+   video.audio_level_set(volume);
    return EINA_TRUE;
 }
 
@@ -50,6 +52,7 @@ video_obj_stopped_cb(void *data EINA_UNUSED, Evas_Object *obj, void *event_info 
      {
         if(efl::eina::optional<elm_video> video = av->video.lock())
           {
+             std::cout  << "replaying video!" << std::endl;
              video->play_position_set(0.0);
              video->play();
           }
@@ -65,14 +68,15 @@ video_obj_progress_cb(void *data EINA_UNUSED, Evas_Object *obj, void *event_info
      }
 }
 
+Eina_Bool
+emc_app_av::widget_setup()
+{
+}
 
 Eina_Bool
 emc_app_av::play_set(Eina_Bool play)
 {
    Eo* test;
-   struct AV_Data tdata;
-   memset(&tdata, 0, sizeof(struct AV_Data));
-
    if(play == EINA_TRUE)
      {
         elm_box bigbox( efl::eo::parent = win );
@@ -82,19 +86,6 @@ emc_app_av::play_set(Eina_Bool play)
         bigbox.horizontal_set(true);
         win.callback_del_add(clean_ref(bigbox));
 
-        //XXX: Implement lambda+signals
-        ::elm_video video ( efl::eo::parent = win );
-        video.file_set(file_get());
-        video.play_position_set(this->av_position);
-        video.audio_level_set(this->av_volume);
-
-
-        // Fits the window size
-        video.size_hint_weight_set(EVAS_HINT_EXPAND, EVAS_HINT_EXPAND);
-        win.resize_object_add(video);
-
-        video.visibility_set(true);
-        win.callback_del_add(clean_ref(video));
 
         // Buttons
         elm_box buttons ( efl::eo::parent = win );
@@ -111,14 +102,11 @@ emc_app_av::play_set(Eina_Bool play)
 
         // Embedded lambda function for Play button
         play.callback_clicked_add
-            (std::bind([&tdata] (void)
+            (std::bind([this] (void)
                 {
                     std::cout << "Video Play" << std::endl;
-                    if(efl::eina::optional<elm_video> video = tdata.video.lock())
-                        {
-                            if(!video->is_playing_get())
-                                video->play();
-                        }
+                            if(!video.is_playing_get())
+                                video.play();
                 }));
         win.callback_del_add(clean_ref(play));
 
@@ -128,36 +116,35 @@ emc_app_av::play_set(Eina_Bool play)
         buttons.pack_end(pause);
         pause.visibility_set(true);
 
+
         // Embedded lambda function for Pause button
         pause.callback_clicked_add
-            (std::bind([&tdata] (void)
+            (std::bind([this] (void)
                 {
-                    std::cout << "Video Pause" << std::endl;
-                    if(efl::eina::optional<elm_video> video = tdata.video.lock())
-                    {
-                        if(video->is_playing_get())
-                            video->pause();
-                    }
+                    std::cout << "Video Pause IN" << std::endl;
+                        std::cout << "Got instance" << std::endl;
+                        if(video.is_playing_get())
+                        {
+                            std::cout << "pausing..." << std::endl;
+                            video.pause();
+                        }
                 }));
         win.callback_del_add(clean_ref(pause));
 
-        tdata.video = video;
-        tdata.loop = this->av_loop;
-
-#if 0 // Nothing happens :(
+#ifndef EMC_DISABLE_EO_CALLBACK
     video.callback_decode_stop_add
-            (std::bind([&tdata] (void)
+            (std::bind([this] ()
                 {
                     std::cout << "Decode stop" << std::endl;
                 }));
     video.callback_progress_change_add
-            (std::bind([&tdata] (void)
+            (std::bind([this] ()
                 {
                     std::cout << "Progress change" << std::endl;
                 }));
 
-#else
-        static struct AV_Data _stdata; //only for test
+#else // temporary impl
+        static struct AV_Data _stdata;
         _stdata.video = video;
         _stdata.loop = this->av_loop;
         Evas_Object *_tmp_obj;
@@ -165,6 +152,7 @@ emc_app_av::play_set(Eina_Bool play)
         evas_object_smart_callback_add(_tmp_obj, "decode_stop", video_obj_stopped_cb, &_stdata);
         evas_object_smart_callback_add(_tmp_obj, "progress_change", video_obj_progress_cb, &_stdata);
 #endif
+
         video.play();
 
         std::cout << "File: " << file_get() << std::endl;

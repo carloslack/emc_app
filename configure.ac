@@ -15,6 +15,7 @@ AC_PROG_CC
 AC_PROG_MAKE_SET
 
 AC_CHECK_HEADER_STDBOOL
+AC_CHECK_FUNCS([memset])
 
 # Checks for libraries.
 # Check for EFL
