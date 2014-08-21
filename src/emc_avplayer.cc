@@ -152,7 +152,7 @@ emc_avplayer::play_set(Eina_Bool to_play)
             (std::bind([this] ()
                 {
                     std::cout << "New volume: " << slider.value_get() << std::endl;
-                    video.audio_level_set(static_cast<double>(slider.value_get()));
+                    video.audio_level_set(slider.value_get());
                 }));
 
 #ifndef EMC_DISABLE_EO_CALLBACK // waiting for E support. See elm_video.eo events
