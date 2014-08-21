@@ -3,12 +3,6 @@
 
 #include "emc.hh"
 
-struct AV_Data
-{
-   efl::eo::wref<elm_video> video;
-   bool loop;
-};
-
 Eina_Bool
 emc_app_av::file_set(const std::string &filename)
 {
@@ -45,32 +39,25 @@ emc_app_av::loop_set(bool loop)
 static void
 video_obj_stopped_cb(void *data EINA_UNUSED, Evas_Object *obj, void *event_info EINA_UNUSED)
 {
-   struct AV_Data *av = static_cast<struct AV_Data*>(data);
+   emc_app_av *t = static_cast<emc_app_av*>(data);
    std::cout  << "video stopped!" << std::endl;
-
-   if(av->loop == true)
+   if(t && t->av_loop)
      {
-        if(efl::eina::optional<elm_video> video = av->video.lock())
-          {
-             std::cout  << "replaying video!" << std::endl;
-             video->play_position_set(0.0);
-             video->play();
-          }
+        std::cout  << "[loop] replaying video!" << std::endl;
+        t->video.play_position_set(0.0);
      }
 }
 static void
 video_obj_progress_cb(void *data EINA_UNUSED, Evas_Object *obj, void *event_info EINA_UNUSED)
 {
-   struct AV_Data *av = (struct AV_Data*)data;
-
-   if(efl::eina::optional<elm_video> video = av->video.lock())
-     {
-     }
+   emc_app_av *t = static_cast<emc_app_av*>(data);
+   (void)t;
 }
 
 Eina_Bool
 emc_app_av::widget_setup()
 {
+   //XXX: implement
 }
 
 Eina_Bool
@@ -131,7 +118,7 @@ emc_app_av::play_set(Eina_Bool play)
                 }));
         win.callback_del_add(clean_ref(pause));
 
-#ifndef EMC_DISABLE_EO_CALLBACK
+#ifndef EMC_DISABLE_EO_CALLBACK // waiting for E support. See elm_video.eo events
     video.callback_decode_stop_add
             (std::bind([this] ()
                 {
@@ -144,13 +131,10 @@ emc_app_av::play_set(Eina_Bool play)
                 }));
 
 #else // temporary impl
-        static struct AV_Data _stdata;
-        _stdata.video = video;
-        _stdata.loop = this->av_loop;
         Evas_Object *_tmp_obj;
         eo_do(video._eo_ptr(), _tmp_obj = ::elm_obj_video_emotion_get());
-        evas_object_smart_callback_add(_tmp_obj, "decode_stop", video_obj_stopped_cb, &_stdata);
-        evas_object_smart_callback_add(_tmp_obj, "progress_change", video_obj_progress_cb, &_stdata);
+        evas_object_smart_callback_add(_tmp_obj, "decode_stop", video_obj_stopped_cb, this);
+        evas_object_smart_callback_add(_tmp_obj, "progress_change", video_obj_progress_cb, this);
 #endif
 
         video.play();

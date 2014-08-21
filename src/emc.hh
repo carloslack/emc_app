@@ -49,12 +49,16 @@ class emc_app_av
 {
   private:
       std::string av_filename;
-      bool av_loop;
+      //bool av_loop;
       ::elm_win win;
-      ::elm_video video;
       const std::string file_get(void) { return this->av_filename; }
+      //::elm_video video;
       Eina_Bool widget_setup(void);
   public:
+      // XXX: temporary public data
+      bool av_loop;
+      ::elm_video video;
+
       emc_app_av(::elm_win &_win) :
           av_filename(""), av_loop(false),
           win(_win), video(efl::eo::parent = _win)
