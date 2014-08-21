@@ -43,7 +43,7 @@ void operator()(T const&, Eo_Event_Description const&, void*) const
   Eo* _ref;
 };
 
-class emc_app_av
+class emc_avplayer
 {
       std::string av_filename;
       //bool av_loop;
@@ -61,8 +61,8 @@ class emc_app_av
   public:
       bool av_loop; //XXX: use private
       ::elm_video video; //XXX: use private
-      emc_app_av(::elm_win &_win);
-      ~emc_app_av() {}
+      emc_avplayer(::elm_win &_win);
+      ~emc_avplayer() {}
 
       Eina_Bool file_set(const std::string &filename);
       Eina_Bool position_set(double position);

@@ -5,13 +5,13 @@
 #include <iostream>
 #include <stdio.h>
 
-#include "emc.hh"
+#include "emc_avplayer.hh"
 
 #define EMC_ELM_PARENT_INIT(elm_obj,win) \
     elm_obj(efl::eo::parent = win)
 
 // Class constructor
-emc_app_av::emc_app_av(::elm_win &_win) :
+emc_avplayer::emc_avplayer(::elm_win &_win) :
           av_filename(""), av_loop(false),
           win(_win),
           EMC_ELM_PARENT_INIT(video, win),
@@ -56,7 +56,7 @@ emc_app_av::emc_app_av(::elm_win &_win) :
 static void
 video_obj_stopped_cb(void *data EINA_UNUSED, Evas_Object *obj, void *event_info EINA_UNUSED)
 {
-   emc_app_av *t = static_cast<emc_app_av*>(data);
+   emc_avplayer *t = static_cast<emc_avplayer*>(data);
    std::cout  << "video stopped!" << std::endl;
    if(t && t->av_loop)
      {
@@ -68,13 +68,13 @@ static void
 video_obj_progress_cb(void *data EINA_UNUSED, Evas_Object *obj, void *event_info EINA_UNUSED)
 {
    //XXX: implement
-   emc_app_av *t = static_cast<emc_app_av*>(data);
+   emc_avplayer *t = static_cast<emc_avplayer*>(data);
    (void)t;
 }
 
 // EMC
 Eina_Bool
-emc_app_av::file_set(const std::string &filename)
+emc_avplayer::file_set(const std::string &filename)
 {
    if(!filename.size())
      return EINA_FALSE;
@@ -86,28 +86,28 @@ emc_app_av::file_set(const std::string &filename)
 }
 
 Eina_Bool
-emc_app_av::position_set(double position)
+emc_avplayer::position_set(double position)
 {
    video.play_position_set(position);
    return EINA_TRUE;
 }
 
 Eina_Bool
-emc_app_av::volume_set(double volume)
+emc_avplayer::volume_set(double volume)
 {
    video.audio_level_set(volume);
    return EINA_TRUE;
 }
 
 Eina_Bool
-emc_app_av::loop_set(bool loop)
+emc_avplayer::loop_set(bool loop)
 {
    this->av_loop = loop;
    return EINA_TRUE;
 }
 
 Eina_Bool
-emc_app_av::play_set(Eina_Bool to_play)
+emc_avplayer::play_set(Eina_Bool to_play)
 {
    Eo* test;
    if(to_play == EINA_TRUE)

@@ -1,6 +1,6 @@
 #include <stdio.h>
 
-#include "emc.hh"
+#include "emc_avplayer.hh"
 
 EAPI_MAIN int
 elm_main(int argc, char **argv)
@@ -19,7 +19,7 @@ elm_main(int argc, char **argv)
         elm_policy_set(ELM_POLICY_QUIT, ELM_POLICY_QUIT_LAST_WINDOW_CLOSED);
         ::elm_win win(elm_win_util_standard_add("emc-window","Main EMC Frame"));
         win.autodel_set(true);
-        emc_app_av player(win);
+        emc_avplayer player(win);
 
         filename = argv[1];
         player.file_set(filename);
