@@ -1,9 +1,78 @@
+/**
+ * EMC - Enlightenment Media Center
+ *    Audio/Video Player
+ */
 #include <iostream>
 #include <stdio.h>
 
 #include "emc.hh"
 
+#define EMC_ELM_PARENT_INIT(elm_obj,win) \
+    elm_obj(efl::eo::parent = win)
 
+// Class constructor
+emc_app_av::emc_app_av(::elm_win &_win) :
+          av_filename(""), av_loop(false),
+          win(_win),
+          EMC_ELM_PARENT_INIT(video, win),
+          EMC_ELM_PARENT_INIT(bigbox, win),
+          EMC_ELM_PARENT_INIT(buttons, win),
+          EMC_ELM_PARENT_INIT(notify, win),
+          EMC_ELM_PARENT_INIT(play, win),
+          EMC_ELM_PARENT_INIT(pause, win)
+   {
+      // Set widget properties
+      video.size_hint_weight_set(EVAS_HINT_EXPAND, EVAS_HINT_EXPAND);
+      win.resize_object_add(video);
+      video.visibility_set(true);
+      win.callback_del_add(clean_ref(video));
+
+      bigbox.size_hint_weight_set(EVAS_HINT_EXPAND, EVAS_HINT_EXPAND);
+      win.resize_object_add(bigbox);
+      bigbox.visibility_set(true);
+      bigbox.horizontal_set(true);
+      win.callback_del_add(clean_ref(bigbox));
+
+      // Buttons
+      buttons.horizontal_set(EINA_TRUE);
+      bigbox.pack_end(buttons);
+      buttons.visibility_set(true);
+      win.callback_del_add(clean_ref(buttons));
+
+      // Play
+      play.text_set("elm.text", "Play");
+      buttons.pack_end(play);
+      play.visibility_set(true);
+      win.callback_del_add(clean_ref(play));
+
+      // Pause
+      pause.text_set("elm.text", "Pause");
+      buttons.pack_end(pause);
+      pause.visibility_set(true);
+      win.callback_del_add(clean_ref(pause));
+   }
+
+// Callbacks
+static void
+video_obj_stopped_cb(void *data EINA_UNUSED, Evas_Object *obj, void *event_info EINA_UNUSED)
+{
+   emc_app_av *t = static_cast<emc_app_av*>(data);
+   std::cout  << "video stopped!" << std::endl;
+   if(t && t->av_loop)
+     {
+        std::cout  << "[loop] replaying video!" << std::endl;
+        t->video.play_position_set(0.0);
+     }
+}
+static void
+video_obj_progress_cb(void *data EINA_UNUSED, Evas_Object *obj, void *event_info EINA_UNUSED)
+{
+   //XXX: implement
+   emc_app_av *t = static_cast<emc_app_av*>(data);
+   (void)t;
+}
+
+// EMC
 Eina_Bool
 emc_app_av::file_set(const std::string &filename)
 {
@@ -35,25 +104,6 @@ emc_app_av::loop_set(bool loop)
 {
    this->av_loop = loop;
    return EINA_TRUE;
-}
-
-static void
-video_obj_stopped_cb(void *data EINA_UNUSED, Evas_Object *obj, void *event_info EINA_UNUSED)
-{
-   emc_app_av *t = static_cast<emc_app_av*>(data);
-   std::cout  << "video stopped!" << std::endl;
-   if(t && t->av_loop)
-     {
-        std::cout  << "[loop] replaying video!" << std::endl;
-        t->video.play_position_set(0.0);
-     }
-}
-static void
-video_obj_progress_cb(void *data EINA_UNUSED, Evas_Object *obj, void *event_info EINA_UNUSED)
-{
-   //XXX: implement
-   emc_app_av *t = static_cast<emc_app_av*>(data);
-   (void)t;
 }
 
 Eina_Bool
