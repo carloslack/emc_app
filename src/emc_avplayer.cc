@@ -24,17 +24,22 @@ emc_avplayer::emc_avplayer(::elm_win &_win) :
           EMC_ELM_PARENT_INIT(play, win),
           EMC_ELM_PARENT_INIT(pause, win)
    {
+      // Bigbox holding everything
+      bigbox.size_hint_weight_set(EVAS_HINT_EXPAND, EVAS_HINT_EXPAND);
+      win.resize_object_add(bigbox);
+      bigbox.visibility_set(true);
+      bigbox.horizontal_set(false);
+      win.callback_del_add(clean_ref(bigbox));
+
       // Set widget properties
       video.size_hint_weight_set(EVAS_HINT_EXPAND, EVAS_HINT_EXPAND);
       win.resize_object_add(video);
       video.visibility_set(true);
-      win.callback_del_add(clean_ref(video));
+      bigbox.pack_end(video);
 
-      bigbox.size_hint_weight_set(EVAS_HINT_EXPAND, EVAS_HINT_EXPAND);
-      win.resize_object_add(bigbox);
-      bigbox.visibility_set(true);
-      bigbox.horizontal_set(true);
-      win.callback_del_add(clean_ref(bigbox));
+      // Unref videw twice because new ref is created from adding it into bigbox
+      win.callback_del_add(clean_ref(video));
+      win.callback_del_add(clean_ref(video));
 
       volbox.horizontal_set(false);
       volbox.visibility_set(true);
@@ -42,11 +47,11 @@ emc_avplayer::emc_avplayer(::elm_win &_win) :
 
       // VOlume slider
       volslider.min_max_set(0,10);
-      volslider.horizontal_set(false);
+      volslider.horizontal_set(true);
       volslider.unit_format_set("%1.1f");
       volslider.indicator_format_set("%1.1f");
       volslider.visibility_set(true);
-      volslider.inverted_set(true);
+      volslider.inverted_set(false);
       volslider.size_hint_weight_set(EVAS_HINT_EXPAND, EVAS_HINT_EXPAND);
       volbox.pack_end(volslider);
       win.callback_del_add(clean_ref(volslider));
