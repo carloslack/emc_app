@@ -46,10 +46,10 @@ emc_avplayer::emc_avplayer(::elm_win &_win) :
       win.callback_del_add(clean_ref(volbox));
 
       // VOlume slider
-      volslider.min_max_set(0,10);
+      volslider.min_max_set(0,100);
       volslider.horizontal_set(true);
-      volslider.unit_format_set("%1.1f");
-      volslider.indicator_format_set("%1.1f");
+      volslider.unit_format_set("%3.f%%");
+      volslider.indicator_format_set("%3f");
       volslider.visibility_set(true);
       volslider.inverted_set(false);
       volslider.text_set("elm.text", "volume ");
@@ -130,7 +130,7 @@ emc_avplayer::position_set(double position)
 Eina_Bool
 emc_avplayer::volume_set(double volume)
 {
-   video.audio_level_set(volume);
+   video.audio_level_set(volume/10);
    //Set slider position to match volume level
    volslider.value_set(video.audio_level_get());
    return EINA_TRUE;
@@ -175,7 +175,7 @@ emc_avplayer::play_set(Eina_Bool to_play)
             (std::bind([this] ()
                 {
                     std::cout << "New volume: " << volslider.value_get() << std::endl;
-                    video.audio_level_set(volslider.value_get());
+                    video.audio_level_set(volslider.value_get()/10);
                 }));
 
     volmute.callback_changed_add
