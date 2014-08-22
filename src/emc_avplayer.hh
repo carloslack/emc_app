@@ -26,6 +26,7 @@
 //#include <elm_actionslider.eo.hh>
 #include <elm_notify.eo.hh>
 #include <elm_slider.eo.hh>
+#include <elm_check.eo.hh>
 
 #include <Eina.hh>
 
@@ -52,8 +53,10 @@ class emc_avplayer
       //::elm_video video;
       ::elm_box bigbox;
       ::elm_box buttons;
+      ::elm_box volbox;
+      ::elm_slider volslider;
+      ::elm_check volcheck;
       ::elm_notify notify;
-      ::elm_slider slider;
       ::elm_button play;
       ::elm_button pause;
       const std::string file_get(void) {

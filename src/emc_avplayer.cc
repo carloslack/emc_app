@@ -17,8 +17,10 @@ emc_avplayer::emc_avplayer(::elm_win &_win) :
           EMC_ELM_PARENT_INIT(video, win),
           EMC_ELM_PARENT_INIT(bigbox, win),
           EMC_ELM_PARENT_INIT(buttons, win),
+          EMC_ELM_PARENT_INIT(volbox, win),
+          EMC_ELM_PARENT_INIT(volslider, win),
+          EMC_ELM_PARENT_INIT(volcheck, win),
           EMC_ELM_PARENT_INIT(notify, win),
-          EMC_ELM_PARENT_INIT(slider, win),
           EMC_ELM_PARENT_INIT(play, win),
           EMC_ELM_PARENT_INIT(pause, win)
    {
@@ -34,16 +36,29 @@ emc_avplayer::emc_avplayer(::elm_win &_win) :
       bigbox.horizontal_set(true);
       win.callback_del_add(clean_ref(bigbox));
 
+      volbox.horizontal_set(false);
+      volbox.visibility_set(true);
+      win.callback_del_add(clean_ref(volbox));
+
       // VOlume slider
-      slider.min_max_set(0,10);
-      slider.horizontal_set(false);
-      slider.unit_format_set("%1.1f");
-      slider.indicator_format_set("%1.1f");
-      slider.visibility_set(true);
-      slider.inverted_set(true);
-      slider.size_hint_weight_set(EVAS_HINT_EXPAND, EVAS_HINT_EXPAND);
-      bigbox.pack_end(slider);
-      win.callback_del_add(clean_ref(slider));
+      volslider.min_max_set(0,10);
+      volslider.horizontal_set(false);
+      volslider.unit_format_set("%1.1f");
+      volslider.indicator_format_set("%1.1f");
+      volslider.visibility_set(true);
+      volslider.inverted_set(true);
+      volslider.size_hint_weight_set(EVAS_HINT_EXPAND, EVAS_HINT_EXPAND);
+      volbox.pack_end(volslider);
+      win.callback_del_add(clean_ref(volslider));
+
+      Eina_Bool cstate = EINA_FALSE;
+      volcheck.text_set("elm.text", "mute");
+      volcheck.state_pointer_set(&cstate);
+      volcheck.show();
+      volcheck.visibility_set(true);
+      volbox.pack_end(volcheck);
+      win.callback_del_add(clean_ref(volcheck));
+
 
       // Buttons
       buttons.horizontal_set(EINA_TRUE);
@@ -62,6 +77,8 @@ emc_avplayer::emc_avplayer(::elm_win &_win) :
       buttons.pack_end(pause);
       pause.visibility_set(true);
       win.callback_del_add(clean_ref(pause));
+
+      bigbox.pack_end(volbox);
    }
 
 // Callbacks
@@ -109,7 +126,7 @@ emc_avplayer::volume_set(double volume)
 {
    video.audio_level_set(volume);
    //Set slider position to match volume level
-   slider.value_set(video.audio_level_get());
+   volslider.value_set(video.audio_level_get());
    return EINA_TRUE;
 }
 
@@ -148,11 +165,27 @@ emc_avplayer::play_set(Eina_Bool to_play)
                         }
                 }));
 
-    slider.callback_changed_add
+    volslider.callback_changed_add
             (std::bind([this] ()
                 {
-                    std::cout << "New volume: " << slider.value_get() << std::endl;
-                    video.audio_level_set(slider.value_get());
+                    std::cout << "New volume: " << volslider.value_get() << std::endl;
+                    video.audio_level_set(volslider.value_get());
+                }));
+
+    volcheck.callback_changed_add
+            (std::bind([this] ()
+                {
+                    if(volcheck.state_get() == true)
+                    {
+                        std::cout << "Checkbox: checked" << std::endl;
+                        if(video.audio_mute_get() == false)
+                            video.audio_mute_set(true);
+                    } else
+                    {
+                        std::cout << "Checkbox: unchecked" << std::endl;
+                        if(video.audio_mute_get() == true)
+                            video.audio_mute_set(false);
+                    }
                 }));
 
 #ifndef EMC_DISABLE_EO_CALLBACK // waiting for E support. See elm_video.eo events
