@@ -55,7 +55,7 @@ class emc_avplayer
       ::elm_box buttons;
       ::elm_box volbox;
       ::elm_slider volslider;
-      ::elm_check volcheck;
+      ::elm_check volmute;
       ::elm_notify notify;
       ::elm_button play;
       ::elm_button pause;

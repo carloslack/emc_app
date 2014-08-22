@@ -19,7 +19,7 @@ emc_avplayer::emc_avplayer(::elm_win &_win) :
           EMC_ELM_PARENT_INIT(buttons, win),
           EMC_ELM_PARENT_INIT(volbox, win),
           EMC_ELM_PARENT_INIT(volslider, win),
-          EMC_ELM_PARENT_INIT(volcheck, win),
+          EMC_ELM_PARENT_INIT(volmute, win),
           EMC_ELM_PARENT_INIT(notify, win),
           EMC_ELM_PARENT_INIT(play, win),
           EMC_ELM_PARENT_INIT(pause, win)
@@ -37,7 +37,7 @@ emc_avplayer::emc_avplayer(::elm_win &_win) :
       video.visibility_set(true);
       bigbox.pack_end(video);
 
-      // Unref videw twice because new ref is created from adding it into bigbox
+      // XXX: Unref videw twice because new ref is created from adding it into bigbox (!?)
       win.callback_del_add(clean_ref(video));
       win.callback_del_add(clean_ref(video));
 
@@ -52,17 +52,18 @@ emc_avplayer::emc_avplayer(::elm_win &_win) :
       volslider.indicator_format_set("%1.1f");
       volslider.visibility_set(true);
       volslider.inverted_set(false);
+      volslider.text_set("elm.text", "volume ");
       volslider.size_hint_weight_set(EVAS_HINT_EXPAND, EVAS_HINT_EXPAND);
       volbox.pack_end(volslider);
       win.callback_del_add(clean_ref(volslider));
 
       Eina_Bool cstate = EINA_FALSE;
-      volcheck.text_set("elm.text", "mute");
-      volcheck.state_pointer_set(&cstate);
-      volcheck.show();
-      volcheck.visibility_set(true);
-      volbox.pack_end(volcheck);
-      win.callback_del_add(clean_ref(volcheck));
+      volmute.state_pointer_set(&cstate);
+      volmute.show();
+      volmute.visibility_set(true);
+      volbox.pack_end(volmute);
+      volmute.text_set("elm.text", "mute");
+      win.callback_del_add(clean_ref(volmute));
 
 
       // Buttons
@@ -177,10 +178,10 @@ emc_avplayer::play_set(Eina_Bool to_play)
                     video.audio_level_set(volslider.value_get());
                 }));
 
-    volcheck.callback_changed_add
+    volmute.callback_changed_add
             (std::bind([this] ()
                 {
-                    if(volcheck.state_get() == true)
+                    if(volmute.state_get() == true)
                     {
                         std::cout << "Checkbox: checked" << std::endl;
                         if(video.audio_mute_get() == false)
