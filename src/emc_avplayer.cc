@@ -30,8 +30,7 @@ emc_avplayer::emc_avplayer(::elm_win &_win) :
    //XXX: setup notify to hide box
    notify.align_set(0.5, 1.0);
    notify.size_hint_weight_set(EVAS_HINT_EXPAND, EVAS_HINT_EXPAND);
-   notify.timeout_set(3.0);
-   notify.show();
+   notify.allow_events_set(true);
 
    // Bigbox holding everything
    bigbox.size_hint_weight_set(EVAS_HINT_EXPAND, EVAS_HINT_EXPAND);
@@ -46,7 +45,6 @@ emc_avplayer::emc_avplayer(::elm_win &_win) :
 
    // Controllers box
    ctrlbox.horizontal_set(true);
-   ctrlbox.visibility_set(true);
    bigbox.pack_end(ctrlbox);
 
    // VOlume slider
@@ -94,9 +92,14 @@ emc_avplayer::emc_avplayer(::elm_win &_win) :
    stop.visibility_set(true);
    buttons.pack_end(stop);
 
+   //notify.content_set("hide.box", ctrlbox);
+
    // Ref cleanup
    win.callback_del_add(clean_ref(bigbox));
+ 
+
    win.callback_del_add(clean_ref(ctrlbox));
+   //win.callback_del_add(clean_ref(ctrlbox));
 
    // Unref twice - added bigbox
    win.callback_del_add(clean_ref(video));
@@ -161,6 +164,12 @@ video_obj_progress_cb(void *data EINA_UNUSED, Evas_Object *obj, void *event_info
 
    // Update elapse time
    t->elapse.text_set("elm.text", label_text.str());
+}
+
+static void
+mouse_in_cb(void *data EINA_UNUSED, Evas *e EINA_UNUSED, Evas_Object *obj EINA_UNUSED, void *event_info EINA_UNUSED)
+{
+   std::cout << "HIII" << std::endl;
 }
 
 // EMC
@@ -259,6 +268,31 @@ emc_avplayer::play_set(Eina_Bool to_play)
                         if(video.audio_mute_get() == true)
                         video.audio_mute_set(false);
                     }
+                }
+            ));
+
+        // When the mouse in, show Controllers box
+        bigbox.callback_mouse_in_add
+            (std::bind([this]
+                {
+                    ctrlbox.visibility_set(true);
+                }
+            ));
+
+        // When the mouse out, set timeout
+        bigbox.callback_mouse_out_add
+            (std::bind([this]
+                {
+                    notify.timeout_set(0.5);
+                }
+            ));
+
+        // When timeout expires hide Controllers box
+        notify.callback_timeout_add  //XXX: not being called :(
+            (std::bind([this]
+                {
+                    std::cout << "Timeout" << std::endl;
+                    ctrlbox.visibility_set(false);
                 }
             ));
 
