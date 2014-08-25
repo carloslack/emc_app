@@ -7,25 +7,27 @@
 
 #include "emc_avplayer.hh"
 
-#define EMC_ELM_PARENT_INIT(elm_obj,win) \
-    elm_obj(efl::eo::parent = win)
-
 // Class constructor
 emc_avplayer::emc_avplayer(::elm_win &_win) :
-          av_filename(""), av_loop(false),
+          av_filename(""),
+          av_loop(false), length_set(false),
           win(_win),
-          EMC_ELM_PARENT_INIT(bigbox, win),
-          EMC_ELM_PARENT_INIT(volbox, win),
-          EMC_ELM_PARENT_INIT(video, win),
-          EMC_ELM_PARENT_INIT(buttons, win),
-          EMC_ELM_PARENT_INIT(volslider, win),
-          EMC_ELM_PARENT_INIT(progslider, win),
-          EMC_ELM_PARENT_INIT(volmute, win),
-          EMC_ELM_PARENT_INIT(notify, win),
-          EMC_ELM_PARENT_INIT(play, win),
-          EMC_ELM_PARENT_INIT(pause, win),
-          length_set(false)
+          bigbox(efl::eo::parent = win),
+          ctrlbox(efl::eo::parent = win),
+          video(efl::eo::parent = win),
+          buttons(efl::eo::parent = win),
+          volslider(efl::eo::parent = win),
+          progslider(efl::eo::parent = win),
+          volmute(efl::eo::parent = win),
+          notify(efl::eo::parent = win),
+          play(efl::eo::parent = win),
+          pause(efl::eo::parent = win),
+          stop(efl::eo::parent = win),
+          elapse(efl::eo::parent = win)
 {
+   Eina_Bool mutestate = EINA_FALSE;
+
+   //XXX: setup notify to hide box
    notify.align_set(0.5, 1.0);
    notify.size_hint_weight_set(EVAS_HINT_EXPAND, EVAS_HINT_EXPAND);
    notify.timeout_set(3.0);
@@ -35,8 +37,6 @@ emc_avplayer::emc_avplayer(::elm_win &_win) :
    bigbox.size_hint_weight_set(EVAS_HINT_EXPAND, EVAS_HINT_EXPAND);
    win.resize_object_add(bigbox);
    bigbox.visibility_set(true);
-   bigbox.horizontal_set(false);
-   win.callback_del_add(clean_ref(bigbox));
 
    // Set widget properties
    video.size_hint_weight_set(EVAS_HINT_EXPAND, EVAS_HINT_EXPAND);
@@ -44,13 +44,10 @@ emc_avplayer::emc_avplayer(::elm_win &_win) :
    video.visibility_set(true);
    bigbox.pack_end(video);
 
-   // Unref twice - added bigbox
-   win.callback_del_add(clean_ref(video));
-   win.callback_del_add(clean_ref(video));
-
-   volbox.horizontal_set(false);
-   volbox.visibility_set(true);
-   win.callback_del_add(clean_ref(volbox));
+   // Controllers box
+   ctrlbox.horizontal_set(true);
+   ctrlbox.visibility_set(true);
+   bigbox.pack_end(ctrlbox);
 
    // VOlume slider
    volslider.min_max_set(0,100);
@@ -59,51 +56,61 @@ emc_avplayer::emc_avplayer(::elm_win &_win) :
    volslider.indicator_format_set("%3f");
    volslider.visibility_set(true);
    volslider.inverted_set(false);
-   volslider.text_set("elm.text", "volume ");
-   volslider.size_hint_weight_set(EVAS_HINT_EXPAND, EVAS_HINT_EXPAND);
-   volbox.pack_end(volslider);
-   win.callback_del_add(clean_ref(volslider));
+   volslider.text_set("elm.text", "volume");
+   ctrlbox.pack_end(volslider);
 
-   Eina_Bool cstate = EINA_FALSE;
-   volmute.state_pointer_set(&cstate);
+   // Mute checkbox
+   volmute.state_pointer_set(&mutestate);
    volmute.visibility_set(true);
-   volbox.pack_end(volmute);
    volmute.text_set("elm.text", "mute");
-   win.callback_del_add(clean_ref(volmute));
+   ctrlbox.pack_end(volmute);
+
+   // Total length is only known in run time.
+   // Here we setup display options
+   progslider.visibility_set(true);
+   ctrlbox.pack_end(progslider);
+
+   // Elapse time label
+   elapse.visibility_set(true);
+   ctrlbox.pack_end(elapse);
 
    // Buttons
    buttons.horizontal_set(EINA_TRUE);
-   bigbox.pack_end(buttons);
+   ctrlbox.pack_end(buttons);
    buttons.visibility_set(true);
 
-   // Unref twice - added to bigbox
-   win.callback_del_add(clean_ref(buttons));
-   win.callback_del_add(clean_ref(buttons));
-
-   //progslider.min_max_set(0,video.play_length_get());
-   progslider.visibility_set(true);
-   progslider.unit_format_set("%3.2f");
-   progslider.indicator_format_set("%2f");
-   progslider.size_hint_align_set(EVAS_HINT_FILL, 0);
-   bigbox.pack_before(progslider,buttons);
-   win.callback_del_add(clean_ref(progslider));
-
-   // Play
+   // Play buttom
    play.text_set("elm.text", "Play");
-   buttons.pack_end(play);
    play.visibility_set(true);
-   win.callback_del_add(clean_ref(play));
+   buttons.pack_end(play);
 
-   // Pause
+   // Pause buttom
    pause.text_set("elm.text", "Pause");
-   buttons.pack_end(pause);
    pause.visibility_set(true);
+   buttons.pack_end(pause);
+
+   // Stop buttom
+   stop.text_set("elm.text", "Stop");
+   stop.visibility_set(true);
+   buttons.pack_end(stop);
+
+   // Ref cleanup
+   win.callback_del_add(clean_ref(bigbox));
+   win.callback_del_add(clean_ref(ctrlbox));
+
+   // Unref twice - added bigbox
+   win.callback_del_add(clean_ref(video));
+   win.callback_del_add(clean_ref(video));
+
+   // Unref remaining objects
+   win.callback_del_add(clean_ref(volslider));
+   win.callback_del_add(clean_ref(buttons));
+   win.callback_del_add(clean_ref(volmute));
+   win.callback_del_add(clean_ref(progslider));
+   win.callback_del_add(clean_ref(elapse));
+   win.callback_del_add(clean_ref(play));
    win.callback_del_add(clean_ref(pause));
-
-   bigbox.pack_end(volbox);
-
-
-
+   win.callback_del_add(clean_ref(stop));
 }
 
 // Callbacks
@@ -111,47 +118,49 @@ static void
 video_obj_stopped_cb(void *data EINA_UNUSED, Evas_Object *obj, void *event_info EINA_UNUSED)
 {
    emc_avplayer *t = static_cast<emc_avplayer*>(data);
-   std::cout  << "video stopped!" << std::endl;
-   if(t && t->av_loop)
+   if(!t)
      {
-        std::cout  << "[loop] replaying video!" << std::endl;
-        t->video.play_position_set(0.0);
+        std::string errmsg("Invalid Data\n");
+        std::cerr << "Error: " << errmsg;
+        return;
      }
+   if(t->av_loop) t->video.play_position_set(0.0);
 }
 static void
 video_obj_progress_cb(void *data EINA_UNUSED, Evas_Object *obj, void *event_info EINA_UNUSED)
 {
    emc_avplayer *t = static_cast<emc_avplayer*>(data);
+   std::ostringstream label_text;
+   int ph, pm, ps, lh, lm, ls;
+   double pos = t->video.play_position_get();
+   double len = t->video.play_length_get();
+
+   if(!t)
+     {
+        std::string errmsg("Invalid Data\n");
+        std::cerr << "Error: " << errmsg;
+        return;
+     }
+
    if(!t->length_set)
      {
         t->length_set = true;
         t->progslider.min_max_set(0, t->video.play_length_get());
-    }
-  t->progslider.value_set(t->video.play_position_get());
-#if 0
-   double pos, len, scale;
-   //char buf[256];
-   int ph, pm, ps, pf, lh, lm, ls;
-   std::ostringstream out;
+        t->total_time_set(len);
+     }
 
-   pos = t->video.play_position_get();
-   len = t->video.play_length_get();
-   scale = (len > 0.0) ? pos / len : 0.0;
-
-   //std::cout << len/3600 << std::endl;
-    //edje_object_part_drag_value_set(edje, "video_progress", scale, 0.0);
-
-   lh = len / 3600;
-   lm = len / 60 - (lh * 60);
-   ls = len - (lh * 3600) - (lm * 60);
+   // Update slider
+   t->progslider.value_set(pos);
 
    ph = pos / 3600;
    pm = pos / 60 - (ph * 60);
    ps = pos - (ph * 3600) - (pm * 60);
 
-   out << ph << ":" << pm << ":" << ps;
-   pf = pos * 100 - (ps * 100) - (pm * 60 * 100) - (ph * 60 * 60 * 100);
-#endif
+   label_text << ph << ":" << pm << ":" << ps << "/" <<
+       t->lh << ":" << t->lm << ":" << t->ls;
+
+   // Update elapse time
+   t->elapse.text_set("elm.text", label_text.str());
 }
 
 // EMC
@@ -177,7 +186,7 @@ emc_avplayer::position_set(double position)
 Eina_Bool
 emc_avplayer::volume_set(double volume)
 {
-   video.audio_level_set(volume/10);
+   video.audio_level_set(volume);
    //Set slider position to match volume level
    volslider.value_set(video.audio_level_get());
    return EINA_TRUE;
@@ -198,64 +207,82 @@ emc_avplayer::play_set(Eina_Bool to_play)
      {
         // Embedded lambda function for Play button
         play.callback_clicked_add
-            (std::bind([this] ()
+            (std::bind([this]
                 {
                     if(!video.is_playing_get()) video.play();
-                }));
+                }
+            ));
 
         // Embedded lambda function for Pause button
         pause.callback_clicked_add
-            (std::bind([this] ()
+            (std::bind([this]
                 {
                     if(video.is_playing_get()) video.pause();
-                }));
+                }
+            ));
 
-    volslider.callback_changed_add
-            (std::bind([this] ()
+        // Embedded lambda function for Pause button
+        stop.callback_clicked_add
+            (std::bind([this]
+                {
+                    video.play_position_set(0.0);
+                    video.stop();
+                }
+            ));
+
+        // Embedded lambda function for Volume Slider
+        volslider.callback_changed_add
+            (std::bind([this]
                 {
                     video.audio_level_set(volslider.value_get()/10);
-                }));
+                }
+            ));
 
-    progslider.callback_changed_add
-            (std::bind([this] ()
+        // Embedded lambda function for Progress Slider
+        progslider.callback_changed_add
+            (std::bind([this]
                 {
                     // Update video position. Progress slider is updated as side effect.
                     video.play_position_set(progslider.value_get());
-                }));
+                }
+            ));
 
-    volmute.callback_changed_add
-            (std::bind([this] ()
+        // Embedded lambda function for Mute Checkbox
+        volmute.callback_changed_add
+            (std::bind([this]
                 {
                     if(volmute.state_get() == true)
                     {
                         if(video.audio_mute_get() == false)
-                            video.audio_mute_set(true);
-                    } else
-                    {
+                        video.audio_mute_set(true);
+                    } else {
                         if(video.audio_mute_get() == true)
-                            video.audio_mute_set(false);
+                        video.audio_mute_set(false);
                     }
-                }));
+                }
+            ));
 
 #ifndef EMC_DISABLE_EO_CALLBACK // waiting for E support. See elm_video.eo events
-    video.callback_decode_stop_add
-            (std::bind([this] ()
+        video.callback_decode_stop_add
+            (std::bind([this]
                 {
                     std::cout << "Decode stop" << std::endl;
-                }));
-    video.callback_progress_change_add
-            (std::bind([this] ()
+                }
+            ));
+        video.callback_progress_change_add
+            (std::bind([this]
                 {
                     std::cout << "Progress change" << std::endl;
-                }));
+                }
+            ));
 
-#else // temporary impl
+#else // temporary old-style impl
         Evas_Object *_tmp_video_obj;
         eo_do(video. _eo_ptr(), _tmp_video_obj = ::elm_obj_video_emotion_get());
         evas_object_smart_callback_add(_tmp_video_obj, "decode_stop", video_obj_stopped_cb, this);
         evas_object_smart_callback_add(_tmp_video_obj, "frame_decode", video_obj_progress_cb, this);
 #endif
-        video.play();
+        video.play(); // do it!
 
         std::cout << "File: " << file_get() << std::endl;
         std::cout << "Position: " << video.play_position_get() << std::endl;

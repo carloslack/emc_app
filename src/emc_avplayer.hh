@@ -21,12 +21,11 @@
 #include <elm_box.eo.hh>
 #include <elm_button.eo.hh>
 #include <elm_video.eo.hh>
-#include <elm_hover.eo.hh>
 #include <elm_button.eo.hh>
-//#include <elm_actionslider.eo.hh>
 #include <elm_notify.eo.hh>
 #include <elm_slider.eo.hh>
 #include <elm_check.eo.hh>
+#include <elm_label.eo.hh>
 
 #include <Eina.hh>
 
@@ -45,13 +44,19 @@ void operator()(T const&, Eo_Event_Description const&, void*) const
   Eo* _ref;
 };
 
+// Important: several variables and methods below are commented
+// because we still miss a couple of audio events in EFL, forcing us
+// to use old-style callbacks, and such callbacks are declared as static functions
+// and need to have access to data that must not be private.
+// Once video functionalities are made available we'll move all of them to private
+// area.
 class emc_avplayer
 {
       std::string av_filename;
       //bool av_loop;
       ::elm_win win;
       ::elm_box bigbox; //1
-      ::elm_box volbox; //3.1
+      ::elm_box ctrlbox; //3.1
       //::elm_video video;
       ::elm_box buttons; //3.1
       ::elm_slider volslider;
@@ -60,17 +65,37 @@ class emc_avplayer
       ::elm_notify notify;
       ::elm_button play;
       ::elm_button pause;
+      ::elm_button stop;
+      //::elm_label elapse;
+      //bool length_set;
+      //int lh, lm, ls;
       const std::string file_get(void) {
            return this->av_filename;
       }
 
+      //const void total_time_set(const double &len)
+      //  {
+      //     emc_total_time.lh = len / 3600;
+      //     emc_total_time.lm = len / 60 - (emc_total_time.lh * 60);
+      //     emc_total_time.ls = len - (emc_total_time.lh * 3600) - (emc_total_time.lm * 60);
+      //  }
+
   public:
       bool av_loop; //XXX: use private
+      bool length_set; //XXX: use private
       ::elm_video video; //XXX: use private
       ::elm_slider progslider;//XXX: use private
-      bool length_set;
+      ::elm_label elapse; //XXX: use private
+      int lh, lm, ls;//XXX: use private
       emc_avplayer(::elm_win &_win);
       ~emc_avplayer() {}
+
+      const void total_time_set(const double &len)//XXX: use private
+        {
+           lh = len / 3600; // hours
+           lm = len / 60 - (lh * 60); // minutes
+           ls = len - (lh * 3600) - (lm * 60); // seconds
+        }
 
       Eina_Bool file_set(const std::string &filename);
       Eina_Bool position_set(double position);
