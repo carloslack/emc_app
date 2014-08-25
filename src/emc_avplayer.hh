@@ -50,11 +50,12 @@ class emc_avplayer
       std::string av_filename;
       //bool av_loop;
       ::elm_win win;
+      ::elm_box bigbox; //1
+      ::elm_box volbox; //3.1
       //::elm_video video;
-      ::elm_box bigbox;
-      ::elm_box buttons;
-      ::elm_box volbox;
+      ::elm_box buttons; //3.1
       ::elm_slider volslider;
+      //::elm_slider progslider;
       ::elm_check volmute;
       ::elm_notify notify;
       ::elm_button play;
@@ -66,6 +67,8 @@ class emc_avplayer
   public:
       bool av_loop; //XXX: use private
       ::elm_video video; //XXX: use private
+      ::elm_slider progslider;//XXX: use private
+      bool length_set;
       emc_avplayer(::elm_win &_win);
       ~emc_avplayer() {}
 
