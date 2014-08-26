@@ -2,9 +2,6 @@
  * EMC - Enlightenment Media Center
  *    Audio/Video Player
  */
-#include <iostream>
-#include <sstream>
-
 #include "emc_avplayer.hh"
 
 // Class constructor
@@ -99,7 +96,6 @@ emc_avplayer::emc_avplayer(::elm_win &_win) :
    win.callback_del_add(clean_ref(bigbox));
 
    win.callback_del_add(clean_ref(ctrlbox));
-   //win.callback_del_add(clean_ref(ctrlbox));
 
    // Unref twice - added bigbox
    win.callback_del_add(clean_ref(video));
@@ -164,12 +160,6 @@ video_obj_progress_cb(void *data EINA_UNUSED, Evas_Object *obj, void *event_info
 
    // Update elapse time
    t->elapse.text_set("elm.text", label_text.str());
-}
-
-static void
-mouse_in_cb(void *data EINA_UNUSED, Evas *e EINA_UNUSED, Evas_Object *obj EINA_UNUSED, void *event_info EINA_UNUSED)
-{
-   std::cout << "HIII" << std::endl;
 }
 
 // EMC
