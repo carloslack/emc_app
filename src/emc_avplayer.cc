@@ -27,9 +27,11 @@ emc_avplayer::emc_avplayer(::elm_win &_win) :
 {
    Eina_Bool mutestate = EINA_FALSE;
 
-   //XXX: setup notify to hide box
+   // Notify - hide/unhide controllers
    notify.align_set(0.5, 1.0);
    notify.size_hint_weight_set(EVAS_HINT_EXPAND, EVAS_HINT_EXPAND);
+   notify.timeout_set(5.0);
+   notify.visibility_set(true);
    notify.allow_events_set(true);
 
    // Bigbox holding everything
@@ -45,6 +47,7 @@ emc_avplayer::emc_avplayer(::elm_win &_win) :
 
    // Controllers box
    ctrlbox.horizontal_set(true);
+   ctrlbox.visibility_set(true);
    bigbox.pack_end(ctrlbox);
 
    // VOlume slider
@@ -92,11 +95,8 @@ emc_avplayer::emc_avplayer(::elm_win &_win) :
    stop.visibility_set(true);
    buttons.pack_end(stop);
 
-   //notify.content_set("hide.box", ctrlbox);
-
    // Ref cleanup
    win.callback_del_add(clean_ref(bigbox));
- 
 
    win.callback_del_add(clean_ref(ctrlbox));
    //win.callback_del_add(clean_ref(ctrlbox));
@@ -263,19 +263,11 @@ emc_avplayer::play_set(Eina_Bool to_play)
                     if(volmute.state_get() == true)
                     {
                         if(video.audio_mute_get() == false)
-                        video.audio_mute_set(true);
+                            video.audio_mute_set(true);
                     } else {
                         if(video.audio_mute_get() == true)
-                        video.audio_mute_set(false);
+                            video.audio_mute_set(false);
                     }
-                }
-            ));
-
-        // When the mouse in, show Controllers box
-        bigbox.callback_mouse_in_add
-            (std::bind([this]
-                {
-                    ctrlbox.visibility_set(true);
                 }
             ));
 
@@ -283,15 +275,40 @@ emc_avplayer::play_set(Eina_Bool to_play)
         bigbox.callback_mouse_out_add
             (std::bind([this]
                 {
-                    notify.timeout_set(0.5);
+                    notify.timeout_set(5.0);
+                }
+            ));
+
+        // When the mouse out, set timeout
+        bigbox.callback_mouse_move_add
+            (std::bind([this]
+                {
+                    if(ctrlbox.visibility_get() == false)
+                    {
+                        ctrlbox.visibility_set(true);
+                    }
+                    notify.timeout_set(5.0);
+                    notify.visibility_set(true);
+                }
+            ));
+
+        // Mouse wheel: same as mouse move
+        bigbox.callback_mouse_wheel_add
+            (std::bind([this]
+                {
+                    if(ctrlbox.visibility_get() == false)
+                    {
+                        ctrlbox.visibility_set(true);
+                    }
+                    notify.timeout_set(5.0);
+                    notify.visibility_set(true);
                 }
             ));
 
         // When timeout expires hide Controllers box
-        notify.callback_timeout_add  //XXX: not being called :(
+        notify.callback_timeout_add
             (std::bind([this]
                 {
-                    std::cout << "Timeout" << std::endl;
                     ctrlbox.visibility_set(false);
                 }
             ));
