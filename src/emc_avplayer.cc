@@ -114,7 +114,7 @@ emc_avplayer::emc_avplayer(::elm_win &_win) :
 
 // Callbacks
 static void
-video_obj_stopped_cb(void *data EINA_UNUSED, Evas_Object *obj, void *event_info EINA_UNUSED)
+video_obj_stopped_cb(void *data, Evas_Object *obj, void *event_info EINA_UNUSED)
 {
    emc_avplayer *t = static_cast<emc_avplayer*>(data);
    if(!t)
@@ -126,7 +126,7 @@ video_obj_stopped_cb(void *data EINA_UNUSED, Evas_Object *obj, void *event_info 
    if(t->av_loop) t->video.play_position_set(0.0);
 }
 static void
-video_obj_progress_cb(void *data EINA_UNUSED, Evas_Object *obj, void *event_info EINA_UNUSED)
+video_obj_progress_cb(void *data, Evas_Object *obj, void *event_info EINA_UNUSED)
 {
    emc_avplayer *t = static_cast<emc_avplayer*>(data);
    std::ostringstream label_text;
